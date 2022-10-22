@@ -1,0 +1,66 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+import java.util.Stack;
+
+
+public class AllisonOrganizedFolders {
+
+    public static void main(String[] args) {
+
+        Scanner input = null;
+        try {
+            input = new Scanner(new File("directory.txt"));
+
+        } catch(FileNotFoundException e){
+            System.out.println("File Not Found!");
+            System.exit(-1);
+        }
+
+        //you may assume that the file has at least one line in it
+        String lastLine = input.nextLine();
+
+        Stack<String> stack = new Stack<String>();
+        while(input.hasNextLine()) {
+
+            String currLine = input.nextLine();
+
+            // if level is different, push into stack
+            if (numBlanks(currLine) > numBlanks(lastLine)) {
+                stack.push(lastLine);
+            }
+            else if (numBlanks(currLine) < numBlanks(lastLine)) {
+                // since left shifting, must be string w/ some num of blanks in the stock
+                if (!stack.empty()) {
+                    String topItem = stack.peek();
+                    if (numBlanks(topItem) == numBlanks(currLine)) {
+                        topItem = stack.pop();
+                        if (currLine.compareTo(topItem) < 0) {
+                            System.out.println("Wrong order");
+                            System.out.println("Prev: " + topItem +  " Curr: " + currLine);
+                            System.exit(-1);
+                        }
+                    }
+
+                }
+            }
+            else {
+                // same level - simple compare
+                if (currLine.compareTo(lastLine) < 0) {
+                    System.out.println("Wrong order");
+                    System.out.println("Prev: " + lastLine +  " Curr: " + currLine);
+                    System.exit(-1);
+                }
+            }
+            lastLine = currLine;
+
+        }
+
+    }
+
+    //determines the amount of blank space
+    //before the first visible character in the parameter
+    private static int numBlanks(String sentence) {
+        return sentence.length() - sentence.trim().length();
+    }
+}
