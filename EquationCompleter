@@ -1,0 +1,107 @@
+import java.util.Scanner;
+import java.util.Stack;
+
+public class AllisonEquationCompleter {
+
+    public static void main(String[] args) {
+        Stack<String> operStack = new Stack<String>();
+        Stack<Integer> numStack = new Stack<Integer>();
+
+        Scanner keyboard = new Scanner(System.in);
+        System.out.println("Enter equation in infix expression: ");
+        String input = keyboard.nextLine();
+        String[] inputData = input.split(" ");
+
+        for (String s: inputData) {
+
+            // if integer, push into numStack
+            if (isInt(s)) {
+              numStack.push(Integer.parseInt(s));
+            }
+            else {
+                if (operStack.isEmpty()) {
+                    operStack.push(s);
+                }
+                // if not empty, check priority level
+                else {
+                    String prevOp = operStack.peek();
+
+                    // if prev operator has priority over recent, calculate and push into stack
+                    if (hasPriority(prevOp, s)) {
+                        int right = numStack.pop();
+                        int left = numStack.pop();
+                        numStack.push(performOp(left, right, prevOp));
+                    }
+                    operStack.push(s);
+                }
+            }
+        }
+
+        // finish processing what's in stacks
+        while(!numStack.isEmpty()) {
+
+            // if numStack has 1 integer in it, it is final answer
+            if (numStack.size() == 1) {
+                System.out.println("Final result: " + numStack.pop());
+            }
+            else {
+                int right = numStack.pop();
+                int left = numStack.pop();
+                numStack.push(performOp(left, right, operStack.pop()));
+            }
+        }
+    }
+
+    // checks if string is integer
+    public static boolean isInt(String s) {
+        try {
+            Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
+    }
+
+    // checks which operator has priority
+    public static boolean hasPriority(String left, String right) {
+
+        // handle special case or recent operator doesn't have priority over previous, return false
+        if (left.equals("^") && right.equals("^") || checkLevel(left) - checkLevel(right) > 0) {
+            return false;
+        }
+        return true;
+    }
+
+    // helper function for hasPriority
+    private static int checkLevel(String str) {
+        int numLevel = 0;
+
+        if (str.equals("+") || str.equals("-")) {
+            numLevel = 2;
+        }
+        if (str.equals("*") || str.equals("/")) {
+            numLevel = 1;
+        }
+        return numLevel;
+    }
+
+    // performs & returns given operation with left being on the left-hand side of the operator
+    public static int performOp(int left, int right, String op) {
+
+        if (op.equals("+")) {
+            return left + right;
+        }
+        else if (op.equals("-")) {
+            return left - right;
+        }
+        else if (op.equals("*")) {
+            return left * right;
+        }
+        else if (op.equals("/")) {
+            return left / right;
+        }
+        else {
+            return (int) Math.pow(left, right);
+        }
+    }
+}
