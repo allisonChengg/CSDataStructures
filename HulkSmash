@@ -1,0 +1,130 @@
+import java.io.*;
+import java.util.*;
+/*
+ * Allison Cheng & Nina Kotval
+ * Hulk Smash: city with square grid, tries to find maxMinions to eat
+ */
+
+public class AllisonNinaHulk {
+	
+	private int[][] city;
+	private int currRow;
+	private int currCol;
+	private int dim;
+	private int maxMinions;
+	private boolean foundValidPath;
+	
+	public AllisonNinaHulk(String fname, int dim) {
+		
+		this.dim = dim;
+		
+		Scanner input = null;
+        try {
+            input = new Scanner(new File(fname));
+
+        } catch(FileNotFoundException e){
+            System.out.println("File Not Found!");
+            System.exit(-1);
+        }
+        
+        city = new int[dim][dim];
+        for (int row = 0; row < dim; row++) {
+        	for (int col = 0; col < dim; col++) {
+            	city[row][col] = input.nextInt();
+            }
+        	System.out.println();
+        }
+        
+        Stack<Sector> cityStack = new Stack<Sector>();
+        
+        Sector currSector = new Sector(currRow, currCol, 0);
+        boolean keepLooping = true;
+        	
+        while(keepLooping) {
+        	
+        	// 2 viable moves
+        	if (canMoveRight() && canMoveDown()) {
+        		cityStack.push(new Sector(currRow, currCol + 1, currSector.numMinions += city[currRow][currCol]));
+        			
+        		// process move down & update currSector
+        		currRow += 1;
+        		currSector.currRow = currRow;
+        		currSector.currCol = currCol;
+        		currSector.numMinions += city[currRow][currCol];
+        			
+        		System.out.println("right & down");
+        	}
+        	// only can move down
+        	else if (canMoveDown()) {
+        		currRow += 1;
+        		currSector.currRow = currRow;
+        		currSector.currCol = currCol;
+        		currSector.numMinions += city[currRow][currCol];
+        			
+        		System.out.println("down");
+
+        	}
+        	// only can move right
+        	else if (canMoveRight()) {
+        		currCol += 1;
+        		currSector.currRow = currRow;
+        		currSector.currCol = currCol;
+        		currSector.numMinions += city[currRow][currCol];
+        		System.out.println("right");
+
+        	}
+        	else {
+        		
+        		// if path found (bottom right corner)
+        		if (currRow + 1 == dim && currCol + 1 == dim) {
+            		foundValidPath = true;
+            		
+            		if (currSector.numMinions > maxMinions) {
+            			maxMinions = currSector.numMinions;
+            		}
+        		}
+        		
+        		if(cityStack.isEmpty()) {
+            		keepLooping = false;
+        		}
+        		else {
+        			currSector = cityStack.pop();
+        		}
+        	}
+        	System.out.println("------------");
+        }
+        	
+        if(!foundValidPath) {
+        	System.out.println("no valid path");
+        	System.exit(-1);
+        }
+        System.out.println("Max Minions: " + maxMinions);    
+	}     
+   
+	// helper function for right move
+	private boolean canMoveRight() {
+		return (currCol + 1 < dim && city[currRow][currCol + 1] > -1);
+    }
+    
+	// helper function for down move
+    private boolean canMoveDown() {
+    	return (currRow + 1 < dim && city[currRow + 1][currCol] > -1);
+    }     
+	
+	public class Sector {
+		
+		private int currRow;
+		private int currCol;
+		private int numMinions;
+		
+		public Sector(int r, int c, int nM) {
+			currRow = r;
+			currCol = c;
+			numMinions = nM;
+		}
+	}
+	
+	public static void main(String[] args) {
+		 AllisonNinaHulk h = new AllisonNinaHulk("CP147.txt", 12); 
+	}
+}
